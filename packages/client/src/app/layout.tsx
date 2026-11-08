@@ -4,10 +4,10 @@ import { DeployRecovery } from "../components/deploy-recovery";
 
 export const metadata: Metadata = {
   title: {
-    default: "My App",
-    template: "%s | My App",
+    default: "tidepost",
+    template: "%s | tidepost",
   },
-  description: "A full-stack web application",
+  description: "Your own Instagram scheduler.",
 };
 
 /*
@@ -40,26 +40,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        {/*
-          A ternary, never `domain && <script/>`. CI passes "" when the repo
-          variable is unset, and `"" && …` renders "" as a text node in
-          <head>. The exported HTML has none, hydration fails (React #418),
-          and React's client re-render drops every <link> in <head> — the
-          stylesheet included. e2e/export/landing-styles.spec.ts checks it.
-        */}
-        {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ? (
-          <script
-            defer
-            data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
-            src={
-              process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL ||
-              "https://plausible.io/js/script.js"
-            }
-          />
-        ) : null}
-      </head>
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="min-h-screen bg-zinc-950 font-sans text-zinc-200 antialiased">
         {/* Offers a reload when this tab's bundle is older than the one
             being served, and recovers a chunk that no longer exists. Pass
             this app's writes in as `writes` so the offer waits for one in

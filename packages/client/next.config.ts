@@ -70,7 +70,7 @@ const nextConfig: NextConfig = {
         }),
   trailingSlash: true,
   images: { unoptimized: true },
-  transpilePackages: ["@starter/shared"],
+  transpilePackages: ["@starter/shared", "@tidepost/ui"],
   // Android live reload: Next 16 blocks cross-origin requests for /_next
   // dev resources, and under `pnpm dev:android` the document is served
   // from the emulator's view of the host (http://10.0.2.2:<port>), which

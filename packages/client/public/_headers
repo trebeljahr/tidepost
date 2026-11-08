@@ -1,0 +1,4 @@
+/version.json
+  Cache-Control: no-store
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

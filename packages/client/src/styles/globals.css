@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@source "../../../ui/src";
 
 /* Dark mode via .dark class on a parent (matches shadcn convention). */
 @custom-variant dark (&:is(.dark *));
