@@ -20,7 +20,7 @@
     "db:migrate": "wrangler d1 migrations apply DB --remote",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "preview": "pnpm run build && wrangler d1 migrations apply DB --local && wrangler dev",
-    "deploy": "pnpm run build && wrangler d1 migrations apply DB --remote && wrangler deploy"
+    "deploy": "pnpm run build && wrangler deploy && wrangler d1 migrations apply DB --remote"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
