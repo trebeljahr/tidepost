@@ -1,0 +1,52 @@
+{
+  "version": 5,
+  "cliVersion": "0.3.1",
+  "scaffoldedAt": "2026-11-08T05:36:04.325Z",
+  "name": "tidepost",
+  "identifiers": {
+    "slug": "tidepost",
+    "token": "tidepost",
+    "productName": "Tidepost",
+    "shortName": "Tidepost",
+    "orgDomain": "example.com",
+    "bundleId": "com.example.tidepost",
+    "storagePrefix": "tidepost",
+    "keychainService": "tidepost",
+    "clientHeader": "x-tidepost-client",
+    "webhookHeaderPrefix": "X-Tidepost-",
+    "clientIds": {
+      "desktop": "tidepost-desktop",
+      "mobile": "tidepost-mobile",
+      "extension": "tidepost-extension",
+      "raycast": "tidepost-raycast",
+      "mcp": "tidepost-mcp",
+      "cli": "tidepost-cli"
+    },
+    "databaseName": "tidepost",
+    "exportFilePrefix": "tidepost",
+    "envPrefix": "TIDEPOST",
+    "npmScope": "@tidepost",
+    "desktopOrigin": {
+      "scheme": "app",
+      "host": "-"
+    }
+  },
+  "description": "Self-hosted Instagram scheduler that runs on your own Cloudflare account.",
+  "domain": "tidepost.example.com",
+  "features": [],
+  "mlServices": [],
+  "s3Provider": "none",
+  "deployTarget": "new",
+  "deploymentMode": "scaffold-only",
+  "surfaces": "static",
+  "publicService": "client",
+  "topology": "single-origin",
+  "ports": {
+    "server": 5502,
+    "client": 6402
+  },
+  "email": {
+    "transactional": "none",
+    "mailingList": "none"
+  }
+}
