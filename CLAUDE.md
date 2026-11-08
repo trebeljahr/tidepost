@@ -40,13 +40,25 @@ such as `hatchkit destroy <project> --recipe`, `hatchkit gh-pages --undo
 
 ## Tech Stack
 
-- **Frontend:** Next.js (App Router) + Tailwind CSS + shadcn/ui
-- **Monorepo:** pnpm workspaces — `packages/client`, `packages/shared`
+- **Worker:** `packages/worker` — Cloudflare Worker (API, passkeys via @simplewebauthn/server, cron publisher, token refresh, grid mirror), D1 migrations in `packages/worker/migrations`, KV for photos. Root `wrangler.jsonc` deploys it with the client export as static assets.
+- **UI:** `packages/ui` — React components (`TidepostApp`, `setApiBase`) so other hosts (Rico's HQ) can embed the same UI. Tailwind classes; hosts add `@source` for `packages/ui/src`.
+- **Frontend host:** `packages/client` — Next.js static export (`build:export`) that renders `TidepostApp`.
+- **Shared:** `packages/shared` — Instagram limits used by UI and Worker.
+
+Design and decisions: `~/projects/ai-work-notes/projects/tidepost/tidepost-design.md`.
+
+Rules that keep the open-source version clean:
+- No telemetry, analytics or update checks. The Worker talks only to graph.instagram.com and Instagram's image CDN.
+- API tokens can never approve or publish; approval needs a passkey session.
+- Nothing Rico-specific (his instance URL, account IDs, Eos, vault) goes into this repo. HQ integrates through the API and `packages/ui` slots.
 
 ## How to Run
 
 ```bash
 pnpm install                          # install all dependencies
+pnpm run preview                      # build, migrate local D1, wrangler dev (pick a high port: --port)
+pnpm --filter @starter/worker test    # Worker tests in workerd with a fake Instagram API
+pnpm run deploy                       # build, migrate remote D1, wrangler deploy
 pnpm run dev                          # the pinned client port
 pnpm run dev:auto                     # the same, with the port auto-picked
 pnpm run dev:fixed                    # the pinned port, or fail — never a fallback
