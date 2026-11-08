@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --error-on-warnings src test"
   },
   "dependencies": {
     "@simplewebauthn/server": "^14.1.0",
@@ -16,6 +17,7 @@
     "@cloudflare/workers-types": "^5.20261107.1",
     "typescript": "^6.0.3",
     "vitest": "~4.1.12",
-    "wrangler": "^4.158.0"
+    "wrangler": "^4.158.0",
+    "@biomejs/biome": "^1.9.4"
   }
 }

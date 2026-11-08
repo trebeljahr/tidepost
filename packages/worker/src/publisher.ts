@@ -137,24 +137,24 @@ async function advance(env: Env, graph: Graph, igId: string, origin: string, pos
 
   const single = items.length === 1;
 
+  if (post.step === "children" && single) {
+    budget(1);
+    const url = await signedMediaUrl(env, origin, items[0].id, now);
+    const cid = await graph.createImage(igId, url, { caption: post.caption, altText: items[0].alt_text });
+    await setStep(env, post, now, "poll", cid);
+    return "waiting"; // poll next tick (Meta asks for at most one status call per minute)
+  }
+
   if (post.step === "children") {
-    if (single) {
+    for (const it of items) {
+      if (it.container_id) continue;
       budget(1);
-      const url = await signedMediaUrl(env, origin, items[0].id, now);
-      const cid = await graph.createImage(igId, url, { caption: post.caption, altText: items[0].alt_text });
-      await setStep(env, post, now, "poll", cid);
-      return "waiting"; // poll next tick (Meta asks for at most one status call per minute)
-    } else {
-      for (const it of items) {
-        if (it.container_id) continue;
-        budget(1);
-        const url = await signedMediaUrl(env, origin, it.id, now);
-        it.container_id = await graph.createImage(igId, url, { altText: it.alt_text, carouselItem: true });
-        await env.DB.prepare("UPDATE items SET container_id = ? WHERE id = ?").bind(it.container_id, it.id).run();
-      }
-      await setStep(env, post, now, "children_poll", null);
-      return "waiting"; // check the children next tick
+      const url = await signedMediaUrl(env, origin, it.id, now);
+      it.container_id = await graph.createImage(igId, url, { altText: it.alt_text, carouselItem: true });
+      await env.DB.prepare("UPDATE items SET container_id = ? WHERE id = ?").bind(it.container_id, it.id).run();
     }
+    await setStep(env, post, now, "children_poll", null);
+    return "waiting"; // check the children next tick
   }
 
   if (post.step === "children_poll") {
@@ -171,9 +171,8 @@ async function advance(env: Env, graph: Graph, igId: string, origin: string, pos
       } else if (now - (post.started_at ?? now) > POLL_LIMIT_S) {
         await fail(env, post.id, now, `Instagram was still processing photo ${it.position + 1} after 5 minutes.`);
         return "failed";
-      } else {
-        return "waiting";
       }
+      if (st.code !== "FINISHED") return "waiting";
     }
     budget(1);
     const cid = await graph.createCarousel(igId, items.map((i) => i.container_id!), post.caption);

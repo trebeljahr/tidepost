@@ -135,7 +135,7 @@ async function registrationOptions(env: Env, req: Request, kind: string) {
 async function storeRegistration(env: Env, req: Request, kind: string, body: any) {
   const expectedChallenge = await takeChallenge(env, body.challengeId, kind);
   const { rpID, origin } = rp(req);
-  let v;
+  let v: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
   try {
     v = await verifyRegistrationResponse({ response: body.response, expectedChallenge, expectedOrigin: origin, expectedRPID: rpID });
   } catch (e) {
@@ -192,7 +192,7 @@ export async function handleAuth(env: Env, req: Request, path: string): Promise<
     }>();
     if (!row) throw new HttpError(401, "This passkey is not registered here.");
     const { rpID, origin } = rp(req);
-    let v;
+    let v: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
     try {
       v = await verifyAuthenticationResponse({
         response: body.response,

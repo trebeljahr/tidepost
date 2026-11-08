@@ -167,6 +167,9 @@ importers:
         specifier: workspace:*
         version: link:../shared
     devDependencies:
+      '@biomejs/biome':
+        specifier: ^1.9.4
+        version: 1.9.4
       '@cloudflare/vitest-plugin':
         specifier: ^1.6.0
         version: 1.6.0(@cloudflare/workers-types@5.20261107.1)(@types/node@25.9.0)(vitest@4.1.12(@types/node@25.9.0)(jsdom@29.1.1)(vite@8.3.1(@types/node@25.9.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.22.2)))
