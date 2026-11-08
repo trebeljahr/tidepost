@@ -150,3 +150,7 @@ docs-site/build/
 *.log
 npm-debug.log*
 packages/client/public/version.json
+
+# Cloudflare
+.wrangler/
+.dev.vars

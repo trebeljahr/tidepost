@@ -1,0 +1,3 @@
+# A long secret phrase (at least 12 characters). You type it once on your first
+# visit to register a passkey. Change it later to register a new passkey if you lose yours.
+SETUP_CODE=

@@ -7,30 +7,36 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "pnpm --filter @starter/client dev",
+    "dev": "node scripts/dev.mjs",
     "dev:auto": "node scripts/dev.mjs --auto",
-    "build": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build",
-    "build:client": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build",
-    "test": "pnpm run test:client",
+    "build": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build:export && node scripts/write-version-json.mjs packages/client/out/version.json",
+    "build:client": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build:export",
+    "test": "pnpm -r --if-present run test",
     "test:client": "pnpm --filter @starter/client run test",
-    "dev:infra": "docker-compose -f docker-compose.dev.yml up -d",
-    "dev:infra:stop": "docker-compose -f docker-compose.dev.yml down",
-    "dev:infra:reset": "docker-compose -f docker-compose.dev.yml down -v",
     "typecheck": "pnpm -r run typecheck",
     "lint": "pnpm -r --if-present run lint",
     "lint:fix": "pnpm -r --if-present run lint:fix",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
-    "backup:status": "hatchkit backup status --project tidepost",
-    "backup:list": "hatchkit backup snapshots --project tidepost",
-    "backup:restore": "hatchkit backup restore --project tidepost"
+    "db:migrate": "wrangler d1 migrations apply DB --remote",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "preview": "pnpm run build && wrangler d1 migrations apply DB --local && wrangler dev",
+    "deploy": "pnpm run build && wrangler d1 migrations apply DB --remote && wrangler deploy"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.8.0",
-    "mongodb": "^7.7.0",
     "tsx": "^4.22.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.158.0"
   },
   "dependencies": {},
-  "description": "Self-hosted Instagram scheduler that runs on your own Cloudflare account."
+  "description": "Self-hosted Instagram scheduler that runs on your own Cloudflare account.",
+  "license": "MIT",
+  "cloudflare": {
+    "bindings": {
+      "SETUP_CODE": {
+        "description": "A long secret phrase (at least 12 characters). You type it once on your first visit to register your passkey. Keep a copy: change it later to register a new passkey if you lose yours."
+      }
+    }
+  }
 }
