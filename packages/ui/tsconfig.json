@@ -9,6 +9,9 @@
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": true,
+    "noUncheckedIndexedAccess": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
     "paths": { "@starter/shared/*": ["../shared/src/*"] }
   },
   "include": ["src"]

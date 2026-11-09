@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { type AppState, type Grid, type Post, ApiError, api } from "../lib/api";
+import { type AppState, type Grid, type Post, ApiError, api, href, routePath } from "../lib/api";
 import { cn } from "../lib/cn";
 import { type SetupState, SignIn } from "./auth";
 import { Editor } from "./editor";
@@ -13,7 +13,7 @@ import { Calendar, GridView, Queue } from "./views";
 type Route = { view: "queue" | "calendar" | "grid" | "settings" | "guide" } | { view: "post"; id: string };
 
 function parse(hash: string): Route {
-  const [, a, b] = hash.replace(/^#/, "").split("/");
+  const [, a, b] = routePath(hash).split("/");
   if (a === "post" && b) return { view: "post", id: b };
   if (a === "calendar" || a === "grid" || a === "settings" || a === "guide") return { view: a };
   return { view: "queue" };
@@ -75,9 +75,9 @@ export function TidepostApp({ captionSlot, hostAuthenticated = false }: Tidepost
   if (!auth.signedIn) return <SignIn setup={auth.setup} onDone={checkAuth} />;
 
   const go = (hash: string) => {
-    location.hash = hash;
+    location.hash = href(hash);
   };
-  const open = (id: string) => go(`#/post/${id}`);
+  const open = (id: string) => go(`/post/${id}`);
   const newPost = async () => {
     try {
       const p = await api<Post>("/api/posts", { json: {} });
@@ -95,12 +95,12 @@ export function TidepostApp({ captionSlot, hostAuthenticated = false }: Tidepost
   return (
     <div className="mx-auto max-w-6xl px-4 py-4">
       <header className="mb-4 flex flex-wrap items-center gap-2">
-        <a href="#/" className="mr-3 text-lg font-semibold text-zinc-100">
+        <a href={href("/")} className="mr-3 text-lg font-semibold text-zinc-100">
           tidepost
         </a>
         <nav className="flex gap-1">
           {TABS.map(([v, label]) => (
-            <a key={v} href={`#/${v}`} className={cn("rounded-md px-3 py-1.5 text-sm", route.view === v ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-100")}>
+            <a key={v} href={href(`/${v}`)} className={cn("rounded-md px-3 py-1.5 text-sm", route.view === v ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-100")}>
               {label}
               {v === "queue" && attention > 0 && <span className="ml-1.5 rounded-full bg-rose-500 px-1.5 text-xs text-white">{attention}</span>}
             </a>
@@ -115,7 +115,7 @@ export function TidepostApp({ captionSlot, hostAuthenticated = false }: Tidepost
       <div className="mb-4 space-y-2">
         {state && !ig && route.view !== "guide" && (
           <Notice tone="warn">
-            Instagram is not connected yet. Follow the <a className="underline" href="#/guide">setup guide</a>, then paste your token in <a className="underline" href="#/settings">Settings</a>.
+            Instagram is not connected yet. Follow the <a className="underline" href={href("/guide")}>setup guide</a>, then paste your token in <a className="underline" href={href("/settings")}>Settings</a>.
           </Notice>
         )}
         {ig && ig.daysLeft < 14 && <Notice tone="warn">Your Instagram token expires in {ig.daysLeft} days and could not be renewed. Paste a new one in Settings.</Notice>}
@@ -129,7 +129,7 @@ export function TidepostApp({ captionSlot, hostAuthenticated = false }: Tidepost
       {route.view === "settings" && <Settings state={state} onChanged={refresh} />}
       {route.view === "guide" && <Guide />}
       {route.view === "post" && (
-        <Editor key={route.id} id={route.id} username={username} avatar={!!grid?.avatar} grid={grid} posts={posts} onChanged={refresh} onClose={() => go("#/")} onOpen={open} captionSlot={captionSlot} />
+        <Editor key={route.id} id={route.id} username={username} avatar={!!grid?.avatar} grid={grid} posts={posts} onChanged={refresh} onClose={() => go("/")} onOpen={open} captionSlot={captionSlot} />
       )}
     </div>
   );

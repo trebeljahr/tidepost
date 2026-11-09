@@ -86,7 +86,8 @@ function Uploader({ post, hashes, onUploaded }: { post: Post; hashes: Hashes | n
   };
 
   const remove = (i: number) => {
-    URL.revokeObjectURL(pending[i].src);
+    const gone = pending[i];
+    if (gone) URL.revokeObjectURL(gone.src);
     setPending((p) => p.filter((_, j) => j !== i));
     setSel((s) => Math.max(0, Math.min(s, pending.length - 2)));
   };
@@ -97,7 +98,7 @@ function Uploader({ post, hashes, onUploaded }: { post: Post; hashes: Hashes | n
     let latest: Post | null = null;
     try {
       for (let i = 0; i < pending.length; i++) {
-        const p = pending[i];
+        const p = pending[i]!;
         setBusy(`Uploading ${i + 1} of ${pending.length}…`);
         const { blob, dhash } = await exportJpeg(p, aspect);
         latest = await api<Post>(`/api/posts/${post.id}/items`, {
@@ -218,6 +219,8 @@ function Counter({ value, max, label }: { value: number; max: number; label: str
   );
 }
 
+export type CaptionSlot = (post: Post, setCaption: (text: string) => void, ctx: { caption: string; update: (post: Post) => void }) => ReactNode;
+
 export function Editor({
   id,
   username,
@@ -237,8 +240,12 @@ export function Editor({
   onChanged: () => void;
   onClose: () => void;
   onOpen: (id: string) => void;
-  /** Host extension below the caption (HQ puts its review panel here). Gets the post and a setter for the editor text. */
-  captionSlot?: (post: Post, setCaption: (text: string) => void) => ReactNode;
+  /**
+   * Host extension below the caption (for example a review panel). Gets the saved post,
+   * a setter for the editor text, the current (maybe unsaved) text, and `update` to show a
+   * post the host got back from the API (for example after it attached a suggestion).
+   */
+  captionSlot?: CaptionSlot;
 }): ReactNode {
   const [post, setPost] = useState<Post | null>(null);
   const [caption, setCaption] = useState("");
@@ -294,7 +301,7 @@ export function Editor({
 
   const move = (from: number, to: number) => {
     const order = post.items.map((i) => i.id);
-    order.splice(to, 0, order.splice(from, 1)[0]);
+    order.splice(to, 0, ...order.splice(from, 1));
     void patch({ order });
   };
 
@@ -394,7 +401,7 @@ export function Editor({
           )}
         </Card>
 
-        {captionSlot?.(post, setCaption)}
+        {captionSlot?.(post, setCaption, { caption, update: setPost })}
 
         <Card>
           <h2 className="mb-2 font-medium text-zinc-100">When</h2>

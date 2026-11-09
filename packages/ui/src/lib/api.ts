@@ -54,11 +54,10 @@ export interface Grid {
 }
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
+  status: number;
+  constructor(status: number, message: string) {
     super(message);
+    this.status = status;
   }
 }
 
@@ -67,10 +66,26 @@ let BASE = "";
 export function setApiBase(base: string): void {
   BASE = base.replace(/\/$/, "");
 }
+let HEADERS: Record<string, string> = {};
+/** Extra headers on every API call, for a host's own checks, such as a CSRF token. */
+export function setApiHeaders(headers: Record<string, string>): void {
+  HEADERS = { ...headers };
+}
+
+let HASH = "#";
+/** Hosts that route by hash themselves mount tidepost under a prefix, e.g. "#/posts". Default: "#". */
+export function setHashBase(base: string): void {
+  HASH = base.replace(/\/$/, "") || "#";
+}
+/** A link inside tidepost: `href("/settings")` → "#/settings", or "#/posts/settings" under a host prefix. */
+export const href = (path: string): string => HASH + path;
+/** The tidepost part of `location.hash`: "/post/abc", or "" when the hash is outside tidepost. */
+export const routePath = (hash: string): string => (hash.startsWith(HASH) ? hash.slice(HASH.length) : "");
+
 const url = (path: string): string => (BASE ? BASE + path.replace(/^\/api/, "") : path);
 
 export async function api<T>(path: string, init: { method?: string; json?: unknown; body?: BodyInit; headers?: Record<string, string> } = {}): Promise<T> {
-  const headers: Record<string, string> = { ...init.headers };
+  const headers: Record<string, string> = { ...HEADERS, ...init.headers };
   let body = init.body;
   if (init.json !== undefined) {
     headers["content-type"] = "application/json";

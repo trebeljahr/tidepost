@@ -81,7 +81,7 @@ export function dhashOf(source: CanvasImageSource): string {
   const d = ctx.getImageData(0, 0, 9, 8).data;
   const grey = (x: number, y: number): number => {
     const i = (y * 9 + x) * 4;
-    return d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+    return d[i]! * 0.299 + d[i + 1]! * 0.587 + d[i + 2]! * 0.114;
   };
   let hex = "";
   for (let y = 0; y < 8; y++) {

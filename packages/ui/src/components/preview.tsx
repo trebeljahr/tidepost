@@ -101,7 +101,7 @@ export function ProfileGrid({
     .sort((a, b) => (b.scheduledAt ?? Number.MAX_SAFE_INTEGER) - (a.scheduledAt ?? Number.MAX_SAFE_INTEGER));
   type Tile = { key: string; src: string; planned: boolean; post?: Post; multi: boolean; href?: string | null };
   let tiles: Tile[] = [
-    ...planned.map((p) => ({ key: p.id, src: photoUrl(p.items[0].id), planned: true, post: p, multi: p.items.length > 1 })),
+    ...planned.map((p) => ({ key: p.id, src: photoUrl(p.items[0]?.id ?? ""), planned: true, post: p, multi: p.items.length > 1 })),
     ...(grid?.items ?? []).map((g) => ({ key: g.id, src: gridUrl(g.id), planned: false, multi: g.mediaType === "CAROUSEL_ALBUM", href: g.permalink })),
   ];
   if (compact) tiles = tiles.slice(0, 9);
