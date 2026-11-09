@@ -113,12 +113,13 @@ export function TidepostApp({ captionSlot, hostAuthenticated = false }: Tidepost
       </header>
 
       <div className="mb-4 space-y-2">
-        {state && !ig && route.view !== "guide" && (
+        {state && !ig && state.kind === "token" && <Notice tone="warn">Instagram is not connected yet. Connect it on your tidepost itself, signed in with a passkey.</Notice>}
+        {state && !ig && state.kind !== "token" && route.view !== "guide" && (
           <Notice tone="warn">
             Instagram is not connected yet. Follow the <a className="underline" href={href("/guide")}>setup guide</a>, then paste your token in <a className="underline" href={href("/settings")}>Settings</a>.
           </Notice>
         )}
-        {ig && ig.daysLeft < 14 && <Notice tone="warn">Your Instagram token expires in {ig.daysLeft} days and could not be renewed. Paste a new one in Settings.</Notice>}
+        {ig && ig.daysLeft < 14 && <Notice tone="warn">Your Instagram token expires in {ig.daysLeft} days and could not be renewed. Paste a new one in Settings{state?.kind === "token" ? " on your tidepost itself" : ""}.</Notice>}
         {state && state.cronSeenAt > 0 && state.now - state.cronSeenAt > 600 && <Notice tone="warn">The publisher has not run for over 10 minutes. Check the Cron Trigger of this Worker in Cloudflare.</Notice>}
         {error && <Notice tone="error">{error}</Notice>}
       </div>
