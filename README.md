@@ -135,4 +135,4 @@ Layout:
 
 ## License
 
-[AGPL-3.0-or-later](LICENSE). You can use, change and self-host tidepost freely. If you run a changed version for other people over a network, you must offer them its source code. Settings → About links to the source of the running version; keep that link pointing at your copy if you change the code.
+[AGPL-3.0-or-later](LICENSE). You can use, change and self-host tidepost freely. If you run a changed version for other people over a network, you must offer them its source code. Settings → About links to this repository. If you change the code, point `SOURCE_URL` in `packages/ui/src/components/settings.tsx` at your copy.
