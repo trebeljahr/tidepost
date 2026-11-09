@@ -124,4 +124,4 @@ Layout:
 
 ## License
 
-MIT
+[AGPL-3.0-or-later](LICENSE). You can use, change and self-host tidepost freely. If you run a changed version for other people over a network, you must offer them its source code. Settings → About links to the source of the running version; keep that link pointing at your copy if you change the code.

@@ -19,5 +19,6 @@
     "vitest": "~4.1.12",
     "wrangler": "^4.158.0",
     "@biomejs/biome": "^1.9.4"
-  }
+  },
+  "license": "AGPL-3.0-or-later"
 }

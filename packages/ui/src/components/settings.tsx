@@ -20,6 +20,9 @@ interface Token {
   last_used_at: number | null;
 }
 
+/** AGPL-3.0 §13: people using a changed version over a network must be offered its source. Forks: point this at your copy. */
+export const SOURCE_URL = "https://github.com/trebeljahr/tidepost";
+
 export function Settings({ state, onChanged }: { state: AppState | null; onChanged: () => void }): ReactNode {
   const [token, setToken] = useState("");
   const [passkeys, setPasskeys] = useState<Passkey[]>([]);
@@ -181,6 +184,16 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
             </Notice>
           </div>
         )}
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 font-medium text-zinc-100">About</h2>
+        <p className="text-sm text-zinc-400">
+          tidepost is free software under the AGPL-3.0. Source code of this version:{" "}
+          <a className="text-sky-300 hover:underline" href={SOURCE_URL} target="_blank" rel="noreferrer">
+            {SOURCE_URL.replace(/^https:\/\//, "")}
+          </a>
+        </p>
       </Card>
 
       <Card>

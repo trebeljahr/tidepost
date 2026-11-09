@@ -31,7 +31,7 @@
   },
   "dependencies": {},
   "description": "Self-hosted Instagram scheduler that runs on your own Cloudflare account.",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "cloudflare": {
     "bindings": {
       "SETUP_CODE": {
