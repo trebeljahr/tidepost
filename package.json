@@ -7,13 +7,11 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "node scripts/dev.mjs",
-    "dev:auto": "node scripts/dev.mjs --auto",
-    "build": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build:export && node scripts/write-version-json.mjs packages/client/out/version.json",
-    "build:client": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build:export",
-    "test": "pnpm -r --if-present run test",
+    "build": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build && node scripts/write-version-json.mjs packages/client/out/version.json",
+    "build:client": "pnpm --filter @starter/shared run build && pnpm --filter @starter/client run build",
+    "test": "pnpm --filter @starter/shared run build && pnpm -r --if-present run test",
     "test:client": "pnpm --filter @starter/client run test",
-    "typecheck": "pnpm -r run typecheck",
+    "typecheck": "pnpm --filter @starter/shared run build && pnpm -r run typecheck",
     "lint": "pnpm -r --if-present run lint",
     "lint:fix": "pnpm -r --if-present run lint:fix",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
@@ -23,9 +21,7 @@
     "deploy": "pnpm run build && node scripts/deploy.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
     "@types/node": "^25.8.0",
-    "tsx": "^4.22.0",
     "typescript": "^6.0.3",
     "wrangler": "^4.158.0"
   },

@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 // Writes the build-info file that an open tab compares itself against:
 // which commit this bundle was built from, and which API origin was
-// baked into it. The image build stamps the same file from COMMIT_SHA
-// (see the client Dockerfile); this covers a local build, where there is
-// no build arg and the file would otherwise 404.
+// baked into it. `pnpm run build` writes it into packages/client/out.
 //
 // Usage: node scripts/write-version-json.mjs [out-file]
 // Reads COMMIT_SHA and NEXT_PUBLIC_API_URL from the environment, and

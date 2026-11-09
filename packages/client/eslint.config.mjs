@@ -12,15 +12,11 @@ const config = defineConfig([
       // it is green: one rule that fires on code nobody intends to change
       // trains everyone to ignore the whole thing.
       //
-      // This rule asks for `next/image` instead of `<img>`. The client here
-      // builds as a static export with `images: { unoptimized: true }` — the
-      // desktop and mobile shells load it from a file:// origin with no Next
-      // server behind it — so `next/image` does no optimisation and only adds
-      // a wrapper. The <img> tags it flags also render blob: and data: URLs
-      // produced at run time, which `next/image` cannot size ahead of time.
-      //
-      // A project that deploys only to the web and wants the optimiser can
-      // delete this block.
+      // This rule asks for `next/image` instead of `<img>`. The client builds
+      // as a static export with `images: { unoptimized: true }`, so
+      // `next/image` does no optimisation and only adds a wrapper. The <img>
+      // tags also render blob: and data: URLs produced at run time, which
+      // `next/image` cannot size ahead of time.
       "@next/next/no-img-element": "off",
 
       // An underscore prefix is how this codebase says "required by the
@@ -38,13 +34,6 @@ const config = defineConfig([
         },
       ],
     },
-  },
-  {
-    // A `.cjs` file is CommonJS on purpose — drain.cjs is loaded with
-    // `node --require` ahead of the production server — and `require` is
-    // how CommonJS imports.
-    files: ["**/*.cjs"],
-    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 ]);
 
