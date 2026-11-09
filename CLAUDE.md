@@ -14,7 +14,7 @@ The repo started from a `hatchkit` scaffold (`.hatchkit.json`); everything that 
 
 Rules that keep the open-source version clean:
 - No telemetry, analytics or update checks. The Worker talks only to graph.instagram.com and Instagram's image CDN.
-- API tokens can never approve or publish; approval needs a passkey session.
+- Tokens approve or publish only with the opt-in `approve` scope, which only a passkey session can create. No token can change Instagram settings, passkeys or tokens.
 - Nothing specific to one person's instance (its URL, account IDs, private tools or notes) goes into this repo. Other apps integrate through the API and `packages/ui` slots.
 
 ## How to Run

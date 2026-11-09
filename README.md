@@ -104,7 +104,7 @@ A post that is more than 6 hours late (for example after a free-plan pause) goes
 
 ## API
 
-API tokens (Settings → API tokens) let your own scripts add drafts. Scopes: `read` (list posts) and `drafts` (create drafts, add photos, attach a caption suggestion). No token can approve or publish.
+API tokens (Settings → API tokens) let your own scripts add drafts. Scopes: `read` (list posts) and `drafts` (create drafts, add photos, attach a caption suggestion). A third scope, `approve`, is off unless you tick it: it lets an app you host yourself edit, approve and publish posts (for example a private dashboard that embeds the tidepost editor). No token can change Instagram settings, passkeys or tokens.
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" -H "content-type: application/json" \

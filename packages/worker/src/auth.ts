@@ -69,9 +69,21 @@ export function requireSession(p: Principal) {
   if (p.kind !== "session") throw new HttpError(403, "This needs a signed-in browser, not an API token.");
 }
 
-export function requireScope(p: Principal, scope: "read" | "drafts") {
-  if (p.kind === "session") return;
-  if (!p.scopes.has(scope)) throw new HttpError(403, `API token lacks the "${scope}" scope.`);
+export type Scope = "read" | "drafts" | "approve";
+export const SCOPES: readonly Scope[] = ["read", "drafts", "approve"];
+
+/**
+ * Sessions may do everything. Tokens need the scope. `approve` is opt-in: it lets a
+ * host app the person runs themselves act for them in the editor (edit, approve, publish), so it
+ * implies read and drafts. It never covers Instagram settings, passkeys or tokens.
+ */
+export function hasScope(p: Principal, scope: Scope): boolean {
+  if (p.kind === "session") return true;
+  return p.scopes.has(scope) || p.scopes.has("approve");
+}
+
+export function requireScope(p: Principal, scope: Scope) {
+  if (!hasScope(p, scope)) throw new HttpError(403, `API token lacks the "${scope}" scope.`);
 }
 
 // --- challenges -----------------------------------------------------------------
@@ -244,8 +256,8 @@ export async function handleAuth(env: Env, req: Request, path: string): Promise<
   }
   if (path === "/api/tokens" && req.method === "POST") {
     const body = await readJson<{ name?: string; scopes?: string[] }>(req);
-    const scopes = (body.scopes ?? ["read"]).filter((s) => s === "read" || s === "drafts");
-    if (!scopes.length) throw new HttpError(400, "Pick at least one scope: read, drafts.");
+    const scopes = [...new Set(body.scopes ?? ["read"])].filter((s): s is Scope => (SCOPES as readonly string[]).includes(s));
+    if (!scopes.length) throw new HttpError(400, `Pick at least one scope: ${SCOPES.join(", ")}.`);
     const token = `tp_${randomToken(24)}`;
     const id = newId();
     await env.DB.prepare("INSERT INTO api_tokens (id, name, token_hash, scopes, created_at) VALUES (?, ?, ?, ?, ?)")

@@ -1,5 +1,5 @@
 import { MAX_ALT, MAX_BYTES, MAX_ITEMS, isAspect, postProblems } from "@starter/shared/limits";
-import { type Principal, authenticate, requireScope, requireSession } from "./auth";
+import { type Principal, authenticate, hasScope, requireScope, requireSession } from "./auth";
 import type { Env } from "./env";
 import { Graph, GraphError } from "./graph";
 import { syncGrid } from "./maintenance";
@@ -165,7 +165,7 @@ export async function handleApi(env: Env, req: Request, path: string): Promise<R
   }
 
   if (path === "/api/hashes" && m === "GET") {
-    requireSession(principal);
+    requireScope(principal, "read");
     const { results: own } = await env.DB.prepare(
       "SELECT items.post_id AS postId, items.id AS itemId, items.dhash AS dhash, posts.status AS status FROM items JOIN posts ON posts.id = items.post_id WHERE items.dhash IS NOT NULL",
     ).all();
@@ -174,7 +174,7 @@ export async function handleApi(env: Env, req: Request, path: string): Promise<R
   }
 
   if (path === "/api/grid" && m === "GET") {
-    requireSession(principal);
+    requireScope(principal, "read");
     const { results } = await env.DB.prepare("SELECT id, position, media_type AS mediaType, permalink, timestamp, dhash FROM grid ORDER BY position").all();
     return json({
       username: (await getSetting(env, "ig_username")) ?? "",
@@ -184,7 +184,7 @@ export async function handleApi(env: Env, req: Request, path: string): Promise<R
     });
   }
   if (path === "/api/grid/sync" && m === "POST") {
-    requireSession(principal);
+    requireScope(principal, "approve");
     try {
       await syncGrid(env, now, undefined, true);
     } catch (e) {
@@ -193,12 +193,12 @@ export async function handleApi(env: Env, req: Request, path: string): Promise<R
     return json({ ok: true });
   }
   if (path === "/api/grid/avatar" && m === "GET") {
-    requireSession(principal);
+    requireScope(principal, "read");
     return proxyImage(await getSetting(env, "ig_avatar"));
   }
   const gi = path.match(/^\/api\/grid\/([\w-]+)\/(image|dhash)$/);
   if (gi) {
-    requireSession(principal);
+    requireScope(principal, gi[2] === "image" ? "read" : "approve");
     if (gi[2] === "image" && m === "GET") {
       const row = await env.DB.prepare("SELECT image_url FROM grid WHERE id = ?").bind(gi[1]).first<{ image_url: string | null }>();
       return proxyImage(row?.image_url ?? null);
@@ -257,11 +257,11 @@ export async function handleApi(env: Env, req: Request, path: string): Promise<R
         return postResponse(env, id);
       }
       if (m === "PATCH") {
-        requireSession(principal);
+        requireScope(principal, "approve");
         return patchPost(env, req, id, now);
       }
       if (m === "DELETE") {
-        requireSession(principal);
+        requireScope(principal, "approve");
         const p = await loadPost(env, id);
         if (p.status === "publishing") throw new HttpError(409, "This post is being published right now.");
         await deletePhotos(env, id);
@@ -280,8 +280,8 @@ export async function handleApi(env: Env, req: Request, path: string): Promise<R
       await env.DB.prepare("UPDATE posts SET suggestion = ?, updated_at = ? WHERE id = ?").bind(suggestion ? String(suggestion).slice(0, 5000) : null, now, id).run();
       return postResponse(env, id);
     }
-    // Approving and publishing always need a person in a signed-in browser.
-    requireSession(principal);
+    // Approving and publishing need a signed-in person, or a token they created with the opt-in "approve" scope.
+    requireScope(principal, "approve");
     if (action === "approve" && m === "POST") return approve(env, req, id, now, false);
     if (action === "publish-now" && m === "POST") return approve(env, req, id, now, true);
     if (action === "unapprove" && m === "POST") {
@@ -303,7 +303,7 @@ export async function handleApi(env: Env, req: Request, path: string): Promise<R
 
   const im = path.match(/^\/api\/items\/([\w-]+)(\/image)?$/);
   if (im) {
-    requireSession(principal);
+    requireScope(principal, im[2] ? "read" : "approve");
     if (im[2] && m === "GET") return photoResponse(env, im[1], "private, max-age=3600");
     if (!im[2] && m === "DELETE") {
       const it = await env.DB.prepare("SELECT post_id, kv_key FROM items WHERE id = ?").bind(im[1]).first<{ post_id: string; kv_key: string | null }>();
@@ -370,7 +370,7 @@ async function patchPost(env: Env, req: Request, id: string, now: number): Promi
 async function addItem(env: Env, req: Request, postId: string, principal: Principal, now: number): Promise<Response> {
   const p = await loadPost(env, postId);
   assertEditable(p);
-  if (principal.kind === "token" && p.status !== "draft") throw new HttpError(403, "API tokens can only add photos to drafts.");
+  if (!hasScope(principal, "approve") && p.status !== "draft") throw new HttpError(403, "API tokens can only add photos to drafts.");
   const count = (await env.DB.prepare("SELECT COUNT(*) AS n FROM items WHERE post_id = ?").bind(postId).first<{ n: number }>())?.n ?? 0;
   if (count >= MAX_ITEMS) throw new HttpError(400, `A post can have ${MAX_ITEMS} photos at most.`);
   const len = Number(req.headers.get("content-length") ?? 0);

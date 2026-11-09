@@ -2,7 +2,7 @@
 
 import { startRegistration } from "@simplewebauthn/browser";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { type AppState, api } from "../lib/api";
+import { type AppState, api, href } from "../lib/api";
 import { fmt, relative } from "../lib/time";
 import { Card, Notice, btn, btnDanger, btnPrimary, input } from "./ui";
 
@@ -27,7 +27,7 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
   const [token, setToken] = useState("");
   const [passkeys, setPasskeys] = useState<Passkey[]>([]);
   const [tokens, setTokens] = useState<Token[]>([]);
-  const [newToken, setNewToken] = useState<{ name: string; read: boolean; drafts: boolean }>({ name: "", read: true, drafts: false });
+  const [newToken, setNewToken] = useState<{ name: string; read: boolean; drafts: boolean; approve: boolean }>({ name: "", read: true, drafts: false, approve: false });
   const [shown, setShown] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ tone: "info" | "error"; text: string } | null>(null);
@@ -54,6 +54,17 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
   };
 
   const ig = state?.instagram;
+  if (state?.kind === "token") {
+    return (
+      <div className="mx-auto max-w-2xl space-y-4">
+        <Notice>
+          This app reaches tidepost through an API token. Instagram, passkeys and API tokens are managed on your tidepost itself, signed in with a passkey.
+          {ig && <> Instagram: connected as @{ig.username}, token valid for {ig.daysLeft} more days.</>}
+        </Notice>
+        <About />
+      </div>
+    );
+  }
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       {msg && <Notice tone={msg.tone}>{msg.text}</Notice>}
@@ -70,7 +81,7 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
         ) : (
           <p className="text-sm text-zinc-400">
             Not connected. Create a token in your Meta app (steps in the{" "}
-            <a className="text-sky-300 hover:underline" href="#/guide">
+            <a className="text-sky-300 hover:underline" href={href("/guide")}>
               setup guide
             </a>
             ), then paste it here.
@@ -140,7 +151,7 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
       <Card>
         <h2 className="mb-1 font-medium text-zinc-100">API tokens</h2>
         <p className="mb-3 text-sm text-zinc-400">
-          For scripts and helpers you run yourself. <b>read</b> lists posts; <b>drafts</b> creates drafts, adds photos and attaches caption suggestions. No token can approve or publish.
+          For scripts and helpers you run yourself. <b>read</b> lists posts; <b>drafts</b> creates drafts, adds photos and attaches caption suggestions. <b>approve</b> is for a private app you host yourself (for example a dashboard that embeds this editor): it can edit, approve and publish posts, so treat it like your passkey. No token can change Instagram settings, passkeys or tokens.
         </p>
         <ul className="mb-3 space-y-1 text-sm">
           {tokens.map((t) => (
@@ -162,15 +173,19 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
           <label className="flex items-center gap-1 text-sm text-zinc-300">
             <input type="checkbox" checked={newToken.drafts} onChange={(e) => setNewToken({ ...newToken, drafts: e.target.checked })} /> drafts
           </label>
+          <label className="flex items-center gap-1 text-sm text-amber-300" title="Can edit, approve and publish posts. Only for an app you host yourself.">
+            <input type="checkbox" checked={newToken.approve} onChange={(e) => setNewToken({ ...newToken, approve: e.target.checked })} /> approve and publish
+          </label>
           <button
             className={btn}
-            disabled={busy || (!newToken.read && !newToken.drafts)}
+            disabled={busy || (!newToken.read && !newToken.drafts && !newToken.approve)}
             onClick={() =>
               run(async () => {
-                const scopes = [newToken.read && "read", newToken.drafts && "drafts"].filter(Boolean);
+                if (newToken.approve && !confirm("This token can edit, approve and publish posts to your Instagram. Create it?")) return;
+                const scopes = [newToken.read && "read", newToken.drafts && "drafts", newToken.approve && "approve"].filter(Boolean);
                 const r = await api<{ token: string }>("/api/tokens", { json: { name: newToken.name || "API token", scopes } });
                 setShown(r.token);
-                setNewToken({ name: "", read: true, drafts: false });
+                setNewToken({ name: "", read: true, drafts: false, approve: false });
               })
             }
           >
@@ -186,15 +201,7 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
         )}
       </Card>
 
-      <Card>
-        <h2 className="mb-1 font-medium text-zinc-100">About</h2>
-        <p className="text-sm text-zinc-400">
-          tidepost is free software under the AGPL-3.0. Source code of this version:{" "}
-          <a className="text-sky-300 hover:underline" href={SOURCE_URL} target="_blank" rel="noreferrer">
-            {SOURCE_URL.replace(/^https:\/\//, "")}
-          </a>
-        </p>
-      </Card>
+      <About />
 
       <Card>
         <h2 className="mb-2 font-medium text-zinc-100">Session</h2>
@@ -208,5 +215,19 @@ export function Settings({ state, onChanged }: { state: AppState | null; onChang
         </div>
       </Card>
     </div>
+  );
+}
+
+function About(): ReactNode {
+  return (
+    <Card>
+      <h2 className="mb-1 font-medium text-zinc-100">About</h2>
+      <p className="text-sm text-zinc-400">
+        tidepost is free software under the AGPL-3.0. Source code of this version:{" "}
+        <a className="text-sky-300 hover:underline" href={SOURCE_URL} target="_blank" rel="noreferrer">
+          {SOURCE_URL.replace(/^https:\/\//, "")}
+        </a>
+      </p>
+    </Card>
   );
 }
