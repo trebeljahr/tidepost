@@ -154,3 +154,4 @@ packages/client/public/version.json
 # Cloudflare
 .wrangler/
 .dev.vars
+.deploy.env

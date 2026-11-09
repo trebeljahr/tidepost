@@ -44,6 +44,17 @@ npx wrangler secret put SETUP_CODE
 pnpm run deploy
 ```
 
+### Use your own domain (optional)
+
+The domain's zone must be in the same Cloudflare account. Then either add it in the dashboard (Workers & Pages → tidepost → Domains → Add domain), or, when you deploy from a terminal, put it in a `.deploy.env` file next to `package.json`:
+
+```bash
+echo "TIDEPOST_DOMAIN=posts.example.com" > .deploy.env
+pnpm run deploy
+```
+
+Register your passkey on the address you will use: a passkey only works on the host name it was created on.
+
 ### 2. Sign in
 
 Open your Worker's address (shown after the deploy, `https://tidepost.<your-subdomain>.workers.dev`). Type the setup code, and your device creates a passkey. From then on you sign in with the passkey. Passkeys synced by your password manager (iCloud Keychain, Google Password Manager, 1Password) work on your other devices too; Settings → Passkeys adds more. If you lose every passkey, change `SETUP_CODE` in Cloudflare (Workers & Pages → tidepost → Settings → Variables and Secrets) and register again.
